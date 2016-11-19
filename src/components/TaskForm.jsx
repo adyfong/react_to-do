@@ -3,13 +3,12 @@ import React from 'react';
 export default function TaskForm(props) {
   const handleSubmit = (event) => {
    //stop the event from leaving the form
-  event.stopPropogation();
-  // event.preventDefault()
-  const myForm = event.target;
+  // event.stopPropogation();
+  event.preventDefault();
 
   props.addTask(
-    event.target.taskName.value
-    event.target.taskDesc.value
+    event.target.taskName.value,
+    event.target.taskDesc.value,
     );
   return false;
 };
@@ -29,5 +28,4 @@ return(
     <button type="submit" className="btn btn-danger btn-lg">Add Task</button>
   </form>
 );
-
-export default TaskForm;
+};

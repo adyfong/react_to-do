@@ -3,19 +3,10 @@ import Nav       from '../Nav/Nav';
 import TaskForm  from '../TaskForm';
 import Footer    from '../Footer/Footer';
 import TaskList  from '../TaskList';
+import AjaxAdapter from '../../helpers/AjaxAdapter';
 
 import './App.css';
 import './GA_gear.png';
-
-
-class Task{
-    constructor(name, desc){
-      this.name = name;
-      this.desc = desc;
-    }
-}
-
-
 
 export default class App extends React.Component {
 
@@ -27,35 +18,38 @@ export default class App extends React.Component {
       tasks: {},
     };
 
-  this.addTask = this.addTask.bind(this)
+  this.addTask = this.addTask.bind(this);
+}
+
+componentDidMount() {
+  AjaxAdapter.getTasks()
+  .then(allTasks =>
+       this.setState({tasks: newTasks})
+    )
+  .catch((error) => {
+    throw error;
+  });
+}
 
 addTask(name, desc){
   //... the spread operator it clones so when you change the clone it
 
   //supply an object fetch from localhost objst has headers.
-  fetch('/task', {
-    method: 'post'
-    headers: {
-      "Content-type": "application/json; charset=UTF-8"
-    },
-    //create to 2 values es6
-    body: JSON.stringify({name, desc})
-    })
-    .then(r => r.json())
-    .then(newTask => {
-       const newState = {...this.state.tasks};
-       newState[newTask.id] =newTask
-       this.setState.({tasks: newState})
-    })
-     .catch((error) => {
-       throw error;
-   });
 
   // const newState = {...this.state.tasks}
  // Post the db, this nameand desc
  // .then update the state
 
  // this.setState({tasks: newState})
+AjaxAdapter.createTask({name, desc})
+.then(newTask => {
+       const newState = {...this.state.tasks};
+       newState[newTask.id] =newTask
+       this.setState({tasks: newState})
+    })
+     .catch((error) => {
+       throw error;
+   });
 }
 
 
@@ -70,23 +64,29 @@ addTask(name, desc){
           <section className="jumbotron">
             <h1>Task Manager</h1>
             <TaskForm addTask={this.addTask} />
-            <TaskForm />
           </section>
           {/* to do lists */}
           <section className="row">
             <article className="col-md-4">
               <h3>Open Items</h3>
-              <TaskList />
+              <TaskList
+               filter={task => !task.deleted && task.completed}
+               collection={this.state.tasks}
+                />
             </article>
 
             <article className="col-md-4">
               <h3>Completed Items</h3>
-              <TaskList />
+              filter={task => !task.deleted && task.completed}
+              <TaskList collection={this.state.tasks} />
             </article>
 
             <article className="col-md-4">
               <h3>Deleted Items</h3>
-              <TaskList />
+
+              <TaskList
+              filter={task => task.deleted}
+              collection={this.state.tasks} />
             </article>
           </section>
         </main>
